@@ -42,7 +42,7 @@ const imageRatingPages = shuffledImages.map((imagePath, imgIndex) => {
       name: `${fileName}_q${qIndex + 1}_image`,
       html: `
         <div style="text-align: center; margin: 20px 0;">
-          <img src="${imagePath}" width="300" />
+          <img src="https://ysdzm.github.io/survey-js/${imagePath}" width="300" />
         </div>
       `
     },
