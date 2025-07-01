@@ -8,6 +8,7 @@ import { Survey } from 'survey-react-ui'
 // const SURVEY_ID = 1;
 
 const surveyJson = {
+  title: "テスト",
   elements: [{
     name: "FirstName",
     title: "Enter your first name:",
