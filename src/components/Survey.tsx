@@ -1,67 +1,80 @@
 'use client';
 
 import { useMemo } from 'react';
-import 'survey-core/survey-core.css'; // 既に使っているテーマに合わせています
+import 'survey-core/survey-core.css';
 import { Model } from 'survey-core';
 import { Survey } from 'survey-react-ui';
 
-// ---- 設定（必要に応じて調整）---------------------------------------------
+// ====== 設定 ======
+const DEFAULT_BASE = '/survey-js/hcg2025-exp2/rewrite';
 
-// 画像のベースパス：
-// 1) ローカルの public/ 配下を使うなら → '/images-07'
-// 2) GitHub Pages の公開URLを使うなら → 'https://ysdzm.github.io/survey-js/images-07'
-const DEFAULT_BASE = '/survey-js/images-07';
-
-const HAIRSTYLES = [
-  'Style A',
-  'Style B',
-  'Style C',
-  'Style D',
-  'Style E',
+const SUBJECTS = [
+  'Subject 1',
+  'Subject 2',
+  'Subject 3',
+  'Subject 4',
+  'Subject 5',
 ];
 
-const NUM_HAIRSTYLES = 5; // 髪型の数
-const NUM_COLORS = 5;     // 髪色の数
-
-// -------------------------------------------------------------------------
+const PERSONAS = [
+  'Persona 1',
+  'Persona 2',
+  'Persona 3',
+  'Persona 4',
+  'Persona 5',
+];
 
 type Props = {
-  /**
-   * 画像のベースURL（省略時は DEFAULT_BASE を使用）
-   * 例:
-   *   - ローカル: '/images-07'
-   *   - GH Pages: 'https://ysdzm.github.io/survey-js/images-07'
-   */
   baseUrl?: string;
-
-  /**
-   * 髪型のラベル（日本語にするならここを差し替え）
-   * 例: ['ショートボブ','ポニーテール','ツインテール','ロング','おかっぱ']
-   */
-  hairstyles?: string[];
+  subjects?: string[]; // ラベル差し替え用
+  personas?: string[]; // ラベル差し替え用
 };
 
-function makeQuestionPairs(): Array<[number, number]> {
-  const pairs: Array<[number, number]> = [];
-  for (let i = 1; i <= NUM_HAIRSTYLES; i++) {
-    for (let j = 1; j <= NUM_COLORS; j++) {
-      pairs.push([i, j]);
-    }
-  }
-  // Fisher–Yates シャッフル
-  for (let k = pairs.length - 1; k > 0; k--) {
-    const r = Math.floor(Math.random() * (k + 1));
-    [pairs[k], pairs[r]] = [pairs[r], pairs[k]];
-  }
-  return pairs;
+// ---------- ユーティリティ（インデックス規則） ----------
+/** 1..5 を想定：index = (subjectId - 1) * 5 + personaId → 1..25 */
+function idx(subjectId: number, personaId: number): number {
+  return (subjectId - 1) * 5 + personaId;
+}
+function z4(n: number): string {
+  return n.toString().padStart(4, '0');
 }
 
+// Fisher–Yates シャッフル（出題順をランダムにしたい場合）
+function shuffle<T>(arr: T[]): T[] {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const r = Math.floor(Math.random() * (i + 1));
+    [a[i], a[r]] = [a[r], a[i]];
+  }
+  return a;
+}
+
+/**
+ * 25問を生成：
+ *  各問は (subjectId, personaId) のペア。
+ *  問題文は「ペルソナ personaId」。
+ *  選択肢は「そのペルソナ personaId の全5サブジェクト画像」で seed = personaId に固定。
+ *  正解は subjectId。
+ */
 export default function SurveyComponent(props: Props) {
   const base = props.baseUrl ?? DEFAULT_BASE;
-  const hairstyleLabels = props.hairstyles ?? HAIRSTYLES;
+  const subjects = props.subjects ?? SUBJECTS;
+  const personas = props.personas ?? PERSONAS;
 
   const model = useMemo(() => {
-    const pairs = makeQuestionPairs();
+    // 25ペアを列挙
+    const pairs: Array<{ s: number; p: number }> = [];
+    for (let s = 1; s <= 5; s++) {
+      for (let p = 1; p <= 5; p++) {
+        pairs.push({ s, p });
+      }
+    }
+
+    // 出題順：必要に応じてシャッフル
+    // const order = shuffle(pairs);
+    const order = pairs; // ★ デバッグ時は固定順（1→25）
+
+    // console.log(order);
 
     const pages = [
       {
@@ -71,50 +84,71 @@ export default function SurveyComponent(props: Props) {
             type: 'html',
             name: 'intro_html',
             html: `
-              <h3>髪型識別テスト</h3>
-              <p>各問題では、<strong>指定の髪型</strong>に一致する画像を 1 つ選んでください。</p>
-              <p>選択肢は <strong>すべて同じ髪色</strong>です。<u>髪色ではなく髪型の形状</u>で判別してください。</p>
-              <p>全部で ${NUM_HAIRSTYLES * NUM_COLORS} 問あります。「次へ」を押すと開始します。</p>
+              <h3>ペルソナ × サブジェクト 識別テスト</h3>
+              <p>各問題で<strong>指定のペルソナ</strong>が示されます。<br/>
+              そのペルソナで生成された<strong>5つのサブジェクト画像</strong>から、<u>問に対応するサブジェクト</u>を選んでください。</p>
+              <p>画像ファイルは <code>pair_0001_1.png</code> のように
+              <code>pair_{'{' }(s-1)*5 + p → 0001..0025{'}'}_{'{' }seed ( = personaId → 1..5 ){'}'}</code> で命名されています。</p>
+              <ul>
+                <li>同じサブジェクト（s固定）は <code>1, 6, 11, 16, 21</code> のように<strong>5飛ばし</strong></li>
+                <li>同じペルソナ（p固定）は <code>1..5</code>, <code>6..10</code>, <code>11..15</code>... の<strong>5件ブロック</strong></li>
+                <li>選択肢の画像は、常にその問題のペルソナ <code>p</code> に対して <code>seed = p</code> を使用</li>
+              </ul>
+              <p>全部で 25 問あります。「次へ」で開始します。</p>
               <hr />
             `,
           },
         ],
       },
 
-      // 25問（5髪型 × 5髪色）
-      ...pairs.map(([i, j], idx) => {
-        const correctValue = `hs_${i}`;
+      // 25問
+      ...order.map(({ s, p }, idxInOrder) => {
+        const seed = p; // 重要：ペルソナIDに応じて seed を固定 (_1.._5)
+        console.log(`${s}_${p}`);
 
-        // 同じ髪色 j のまま、髪型 1..5 を選択肢にする
-        const choices = Array.from({ length: NUM_HAIRSTYLES }, (_, h) => {
-          const hairIdx = h + 1; // 1..5
-          console.log(`${base}/${hairIdx}_${j}.png`);
+        // サブジェクトs
+        // ペルソナp
+
+        // 選択肢（そのペルソナ p に対する 5サブジェクトの画像）
+        const choices = Array.from({ length: 5 }, (_, k) => {
+          // const subjectId = k + 1; // 1..5
+          const filename = `pair_${z4(s+k*5)}_${p}.png`;
+          const img = `${base}/${filename}`;
+
+          //console.log(s);
+          //console.log(p);
+          console.log(filename);
+
           return {
-            value: `hs_${hairIdx}`,
-            imageLink: `${base}/${hairIdx}_${j}.png`,
-            text: hairstyleLabels[hairIdx - 1],
+            value: `pair_${z4(s+k*5)}_${p}`, // 回答値
+            imageLink: img,            // 選択肢画像
           };
         });
 
+        //console.log(choices);
+
+        // 正解（この問題の (s, p) の s）
+        const correctValue = `sub_${s}`;
+
         return {
-          name: `q_${i}_${j}`,
+          name: `q_${s}_${p}`,
           elements: [
             {
               type: 'html',
-              name: `q_${i}_${j}_title`,
+              name: `q_${s}_${p}_title`,
               html: `
                 <div style="margin-bottom: 8px;">
-                  <strong>問題 ${idx + 1} / ${NUM_HAIRSTYLES * NUM_COLORS}</strong>
+                  <strong>問題 ${idxInOrder + 1} / 25</strong>
                 </div>
                 <div style="margin-bottom: 8px;">
-                  指定の髪型：<strong>${hairstyleLabels[i - 1]}</strong>
-                  <br /><small>※ 選択肢はすべて同じ髪色（色 ${j}）。髪型の形で判別してください。</small>
+                  指定のペルソナ：<strong>${personas[p - 1]}</strong><br/>
+                  <small>※ 選択肢はこのペルソナで生成された 5 サブジェクト（seed = ${seed}）です。</small>
                 </div>
               `,
             },
             {
               type: 'imagepicker',
-              name: `ans_${i}_${j}`,
+              name: `ans_${s}_${p}`,
               isRequired: true,
               colCount: 5,
               choicesOrder: 'random',
@@ -125,7 +159,7 @@ export default function SurveyComponent(props: Props) {
             // 正解を隠しフィールドに保持（採点用）
             {
               type: 'text',
-              name: `key_${i}_${j}`,
+              name: `key_${s}_${p}`,
               defaultValue: correctValue,
               visible: false,
               readOnly: true,
@@ -136,7 +170,7 @@ export default function SurveyComponent(props: Props) {
     ];
 
     const surveyJson = {
-      title: '髪型識別テスト',
+      title: 'Persona × Subject Test',
       showProgressBar: 'top',
       pages,
     };
@@ -149,10 +183,10 @@ export default function SurveyComponent(props: Props) {
       let correct = 0;
       let total = 0;
 
-      for (let i = 1; i <= NUM_HAIRSTYLES; i++) {
-        for (let j = 1; j <= NUM_COLORS; j++) {
-          const ans = data[`ans_${i}_${j}`];
-          const key = data[`key_${i}_${j}`];
+      for (let s = 1; s <= 5; s++) {
+        for (let p = 1; p <= 5; p++) {
+          const ans = data[`ans_${s}_${p}`];
+          const key = data[`key_${s}_${p}`];
           if (typeof ans !== 'undefined' && typeof key !== 'undefined') {
             total += 1;
             if (ans === key) correct += 1;
@@ -160,16 +194,17 @@ export default function SurveyComponent(props: Props) {
         }
       }
 
+      const pct = total ? ((correct / total) * 100).toFixed(1) : '0.0';
       console.log('result/raw:', data);
-      console.log(`score: ${correct} / ${total} (${((correct / total) * 100).toFixed(1)}%)`);
+      console.log(`score: ${correct} / ${total} (${pct}%)`);
       alert(
-        `結果: ${correct} / ${total} 正解（${((correct / total) * 100).toFixed(1)}%）\n\n` +
+        `結果: ${correct} / ${total} 正解（${pct}%）\n\n` +
         `※ 詳細はブラウザのコンソールに出力しています。`
       );
     });
 
     return m;
-  }, [base, hairstyleLabels]);
+  }, [base, subjects, personas]);
 
   return (
     <main style={{ padding: 24 }}>
@@ -177,6 +212,7 @@ export default function SurveyComponent(props: Props) {
     </main>
   );
 }
+
 
 
 
