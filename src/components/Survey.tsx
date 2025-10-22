@@ -90,6 +90,7 @@ export default function SurveyComponent(props: Props) {
                   各問題では、<strong>指定されたペルソナ</strong>が提示されます。<br/>
                   そのペルソナで生成された<strong>5つの画像</strong>の中から、<u>指示されたサブジェクト</u>を選んでください。
                 </p>
+                <p>加藤昇平研究室M2 安田隆哉<br>ryasuda@katolab.nitech.ac.jp</p>
                 <p>全25問です。「次へ」で開始してください。</p>
               </div>
             `,
