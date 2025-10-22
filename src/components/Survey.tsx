@@ -9,19 +9,19 @@ import { Survey } from 'survey-react-ui';
 const DEFAULT_BASE = '/survey-js/hcg2025-exp2/rewrite';
 
 const SUBJECTS = [
-  'Subject 1',
-  'Subject 2',
-  'Subject 3',
-  'Subject 4',
-  'Subject 5',
+  'traditional breakfast',
+  'family portrait',
+  'living room interior',
+  'wedding ceremony',
+  'national park landscape',
 ];
 
 const PERSONAS = [
-  'Persona 1',
-  'Persona 2',
-  'Persona 3',
-  'Persona 4',
-  'Persona 5',
+  'Japanese people',
+  'Korean people',
+  'Indian people',
+  'Egyptian people',
+  'French people',
 ];
 
 type Props = {
@@ -88,12 +88,24 @@ export default function SurveyComponent(props: Props) {
                 <h3>ペルソナ × サブジェクト 識別テスト</h3>
                 <p>
                   各問題では、<strong>指定されたペルソナ</strong>が提示されます。<br/>
-                  そのペルソナで生成された<strong>5つの画像</strong>の中から、<u>指示されたサブジェクト</u>を選んでください。
+                  そのペルソナで生成された<strong>5つの画像</strong>の中から、指定されたペルソナに該当すると思う画像を選択してください。
                 </p>
                 <p>加藤昇平研究室M2 安田隆哉<br>ryasuda@katolab.nitech.ac.jp</p>
                 <p>全25問です。「次へ」で開始してください。</p>
               </div>
             `,
+          },
+          {
+            type: "text",
+            name: "student_id",       // データキーは英数字推奨
+            title: "学籍番号",
+            isRequired: true,
+          },
+          {
+            type: "text",
+            name: "full_name",
+            title: "氏名",
+            isRequired: true,
           },
         ],
       },
@@ -101,8 +113,6 @@ export default function SurveyComponent(props: Props) {
       // 25問
       ...order.map(({ s, p }, idxInOrder) => {
         const seed = p; // 重要：ペルソナIDに応じて seed を固定 (_1.._5)
-        console.log(`${s}_${p}`);
-
         // サブジェクトs
         // ペルソナp
 
@@ -111,11 +121,6 @@ export default function SurveyComponent(props: Props) {
           // const subjectId = k + 1; // 1..5
           const filename = `pair_${z4(s+k*5)}_${p}.png`;
           const img = `${base}/${filename}`;
-
-          //console.log(s);
-          //console.log(p);
-          console.log(filename);
-
           return {
             value: `pair_${z4(s+k*5)}_${p}`, // 回答値
             imageLink: img,            // 選択肢画像
@@ -124,8 +129,8 @@ export default function SurveyComponent(props: Props) {
 
         //console.log(choices);
 
-        // 正解（この問題の (s, p) の s）
-        const correctValue = `sub_${s}`;
+        // 正解は "pair_000{s}_{p}" 形式にする
+        const correctValue = `pair_${z4(s+(p-1)*5)}_${p}`;
 
         return {
           name: `q_${s}_${p}`,
@@ -134,23 +139,28 @@ export default function SurveyComponent(props: Props) {
               type: 'html',
               name: `q_${s}_${p}_title`,
               html: `
-                <div style="margin-bottom: 8px;">
-                  <strong>問題 ${idxInOrder + 1} / 25</strong>
-                </div>
-                <div style="margin-bottom: 8px;">
-                  指定のペルソナ：<strong>${personas[p - 1]}</strong><br/>
-                  <small>※ 選択肢はこのペルソナで生成された 5 サブジェクト（seed = ${seed}）です。</small>
-                </div>
                 <div style="text-align:center;">
-                  <img src="/survey-js/hcg2025-exp2/base/${String(s).padStart(2, '0')}_${seed}.png"
-                      alt="ベース画像"
-                      style="max-width:160px;height:auto;border:1px solid #ccc;border-radius:8px;" />
+                  <div style="margin-bottom: 8px;">
+                    <strong>問題 ${idxInOrder + 1} / 25</strong>
+                  </div>
+                  <div style="margin-bottom: 8px;">
+                    指定のペルソナ：<strong>${personas[p - 1]}</strong><br/>
+                  </div>
+                  <!--
+                  <div>
+                    <img src="/survey-js/hcg2025-exp2/base/${String(s).padStart(2, '0')}_${seed}.png"
+                        alt="ベース画像"
+                        style="max-width:160px;height:auto;border:1px solid #ccc;border-radius:8px;" />
+                  </div>
+                  -->
                 </div>
               `,
             },
             {
               type: 'imagepicker',
               name: `ans_${s}_${p}`,
+              title: '', 
+              titleLocation: 'hidden',
               isRequired: true,
               colCount: 5,
               choicesOrder: 'random',
@@ -163,7 +173,7 @@ export default function SurveyComponent(props: Props) {
               type: 'text',
               name: `key_${s}_${p}`,
               defaultValue: correctValue,
-              visible: false,
+              visible: true,
               readOnly: true,
             },
           ],
@@ -185,10 +195,14 @@ export default function SurveyComponent(props: Props) {
       let correct = 0;
       let total = 0;
 
+      console.log(data);
+
       for (let s = 1; s <= 5; s++) {
         for (let p = 1; p <= 5; p++) {
           const ans = data[`ans_${s}_${p}`];
           const key = data[`key_${s}_${p}`];
+          console.log(ans);
+          console.log(key);
           if (typeof ans !== 'undefined' && typeof key !== 'undefined') {
             total += 1;
             if (ans === key) correct += 1;
