@@ -23,7 +23,7 @@ export default function Home() {
         <div
           style={{
             width: "100%",
-            maxWidth: "900px", // 👈 最大幅をここで設定
+            maxWidth: "1200px", // 👈 最大幅をここで設定
             backgroundColor: "white",
             borderRadius: "12px",
             boxShadow: "0 2px 10px rgba(0,0,0,0.1)",

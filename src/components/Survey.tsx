@@ -84,14 +84,23 @@ export default function SurveyComponent(props: Props) {
             type: 'html',
             name: 'intro_html',
             html: `
-              <div style="text-align: center; max-width: 600px; margin: 0 auto;">
+              <div style="text-align: center; max-width: 700px; margin: 0 auto;">
                 <h3>ペルソナ × サブジェクト 識別テスト</h3>
                 <p>
-                  各問題では、<strong>指定されたペルソナ</strong>が提示されます。<br/>
-                  そのペルソナで生成された<strong>5つの画像</strong>の中から、指定されたペルソナに該当すると思う画像を選択してください。
+                  ＜ 説明 ＞<br>
+                  「問題文」と「5つのペルソナ付き画像」が表示されます。<br>
+                  問題文に記載されたペルソナが反映されていると考える画像を1つ選択してください。<br>
+                  ブラウザのウィンドウは可能な限り広げてて実施してください。
                 </p>
-                <p>加藤昇平研究室M2 安田隆哉<br>ryasuda@katolab.nitech.ac.jp</p>
-                <p>全25問です。「次へ」で開始してください。</p>
+                <p>
+                  ＜ 連絡先 ＞<br>
+                  加藤昇平研究室M2 安田隆哉<br>
+                  ryasuda@katolab.nitech.ac.jp
+                </p>
+                <p>
+                  ＜ 案内 ＞<br>
+                  全25問です。学籍番号と氏名を入力し「Next」で開始してください。<br>
+                </p>
               </div>
             `,
           },
@@ -144,7 +153,9 @@ export default function SurveyComponent(props: Props) {
                     <strong>問題 ${idxInOrder + 1} / 25</strong>
                   </div>
                   <div style="margin-bottom: 8px;">
-                    指定のペルソナ：<strong>${personas[p - 1]}</strong><br/>
+                    下記の<strong>サブジェクト</strong>を、指定された<strong>ペルソナ</strong>の人物が書き換えた場合に、生成されると考えられる画像を選択してください。<br>
+                    サブジェクト：<strong>${subjects[s - 1]}</strong><br/>
+                    ペルソナ：<strong>${personas[p - 1]}</strong><br/>
                   </div>
                   <!--
                   <div>
@@ -173,7 +184,7 @@ export default function SurveyComponent(props: Props) {
               type: 'text',
               name: `key_${s}_${p}`,
               defaultValue: correctValue,
-              visible: true,
+              visible: false,
               readOnly: true,
             },
           ],
