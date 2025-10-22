@@ -18,10 +18,10 @@ const SUBJECTS = [
 
 const PERSONAS = [
   'Japanese people',
-  'Korean people',
   'Indian people',
-  'Egyptian people',
+  'South African people',
   'French people',
+  'American people',
 ];
 
 type Props = {
