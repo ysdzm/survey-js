@@ -71,8 +71,8 @@ export default function SurveyComponent(props: Props) {
     }
 
     // 出題順：必要に応じてシャッフル
-    // const order = shuffle(pairs);
-    const order = pairs; // ★ デバッグ時は固定順（1→25）
+    const order = shuffle(pairs);
+    // const order = pairs; // ★ デバッグ時は固定順（1→25）
 
     // console.log(order);
 
