@@ -97,13 +97,13 @@ export default function SurveyComponent(props: Props) {
           },
           {
             type: "text",
-            name: "student_id",       // データキーは英数字推奨
+            name: "学籍番号",       // データキーは英数字推奨
             title: "学籍番号",
             isRequired: true,
           },
           {
             type: "text",
-            name: "full_name",
+            name: "氏名",
             title: "氏名",
             isRequired: true,
           },
@@ -213,9 +213,26 @@ export default function SurveyComponent(props: Props) {
       const pct = total ? ((correct / total) * 100).toFixed(1) : '0.0';
       console.log('result/raw:', data);
       console.log(`score: ${correct} / ${total} (${pct}%)`);
+      // --- 👇 ここから追記部分（Googleスプレッドシート送信） ---
+      const json = JSON.stringify({
+        correct,
+        total,
+        pct,
+        data,
+        timestamp: new Date().toISOString(),
+      });
+      const encoded = encodeURIComponent(json);
+
+      const url = `https://script.google.com/macros/s/AKfycbyOMSmmLT8wye5xt-0wdx83lNlRL1mwOGe-VD2zOlxTp9IcuOCq2tTNo2pbDnCgPaUvGA/exec?data=${encoded}`;
+
+      fetch(url)
+        .then(res => res.text())
+        .then(result => console.log("✅ GAS送信成功:", result))
+        .catch(err => console.error("❌ GAS送信失敗:", err));
+      // --- 👆 追記ここまで ---
+
       alert(
-        `結果: ${correct} / ${total} 正解（${pct}%）\n\n` +
-        `※ 詳細はブラウザのコンソールに出力しています。`
+        `終了です！ご協力ありがとうございました。`
       );
     });
 
