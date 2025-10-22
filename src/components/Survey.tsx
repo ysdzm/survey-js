@@ -153,7 +153,7 @@ export default function SurveyComponent(props: Props) {
                     <strong>問題 ${idxInOrder + 1} / 25</strong>
                   </div>
                   <div style="margin-bottom: 8px;">
-                    下記の<strong>サブジェクト</strong>を、指定された<strong>ペルソナ</strong>の人物が書き換えた場合に、生成されると考えられる画像を選択してください。<br>
+                    下記の<strong>サブジェクト</strong>を、指定された<strong>ペルソナ</strong>の人物が書き換えた場合に、生成されると考えられる画像を１つ選択してください。<br>
                     サブジェクト：<strong>${subjects[s - 1]}</strong><br/>
                     ペルソナ：<strong>${personas[p - 1]}</strong><br/>
                   </div>
