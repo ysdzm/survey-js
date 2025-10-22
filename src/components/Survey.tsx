@@ -145,7 +145,7 @@ export default function SurveyComponent(props: Props) {
                   <small>※ 選択肢はこのペルソナで生成された 5 サブジェクト（seed = ${seed}）です。</small>
                 </div>
                 <div style="text-align:center;">
-                  <img src="/survey-js/hcg2025-exp2/base/01.png"
+                  <img src="/survey-js/hcg2025-exp2/base/${String(s).padStart(2, '0')}_${seed}.png"
                       alt="ベース画像"
                       style="max-width:160px;height:auto;border:1px solid #ccc;border-radius:8px;" />
                 </div>
