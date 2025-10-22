@@ -84,18 +84,14 @@ export default function SurveyComponent(props: Props) {
             type: 'html',
             name: 'intro_html',
             html: `
-              <h3>ペルソナ × サブジェクト 識別テスト</h3>
-              <p>各問題で<strong>指定のペルソナ</strong>が示されます。<br/>
-              そのペルソナで生成された<strong>5つのサブジェクト画像</strong>から、<u>問に対応するサブジェクト</u>を選んでください。</p>
-              <p>画像ファイルは <code>pair_0001_1.png</code> のように
-              <code>pair_{'{' }(s-1)*5 + p → 0001..0025{'}'}_{'{' }seed ( = personaId → 1..5 ){'}'}</code> で命名されています。</p>
-              <ul>
-                <li>同じサブジェクト（s固定）は <code>1, 6, 11, 16, 21</code> のように<strong>5飛ばし</strong></li>
-                <li>同じペルソナ（p固定）は <code>1..5</code>, <code>6..10</code>, <code>11..15</code>... の<strong>5件ブロック</strong></li>
-                <li>選択肢の画像は、常にその問題のペルソナ <code>p</code> に対して <code>seed = p</code> を使用</li>
-              </ul>
-              <p>全部で 25 問あります。「次へ」で開始します。</p>
-              <hr />
+              <div style="text-align: center; max-width: 600px; margin: 0 auto;">
+                <h3>ペルソナ × サブジェクト 識別テスト</h3>
+                <p>
+                  各問題では、<strong>指定されたペルソナ</strong>が提示されます。<br/>
+                  そのペルソナで生成された<strong>5つの画像</strong>の中から、<u>指示されたサブジェクト</u>を選んでください。
+                </p>
+                <p>全25問です。「次へ」で開始してください。</p>
+              </div>
             `,
           },
         ],
